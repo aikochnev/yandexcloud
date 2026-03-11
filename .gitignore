@@ -1,0 +1,19 @@
+authorized_key.json
+
+# Local .terraform directories
+**/.terraform/*
+**/.terraformrc
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+.terraform.tfstate*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Sensitive variables
+*.tfvars
+*.tfvars.json
+terraform.tfvars

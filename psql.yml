@@ -1,0 +1,14 @@
+---
+- name: psql
+  gather_facts: true
+  hosts: db
+  vars:
+    ansible_ssh_user: user
+    postgresql_version: 15
+    postgresql_listen_address: "0.0.0.0"
+    postgresql_db_name: myapp
+    postgresql_db_user: myuser
+    postgresql_db_password: "StrongPassword123"
+  become: yes
+  roles:
+    - psql

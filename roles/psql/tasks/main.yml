@@ -1,0 +1,65 @@
+---
+# tasks file for psql
+- name: Install required packages
+  apt:
+    name:
+      - gnupg2
+      - python3-psycopg2
+      - acl
+    state: present
+    update_cache: true
+
+- name: Add PostgreSQL GPG key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: Add PostgreSQL APT repository
+  apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+    state: present
+    filename: pgdg
+
+- name: Install PostgreSQL server and client
+  apt:
+    name:
+      - "postgresql-{{ postgresql_version }}"
+      - "postgresql-client-{{ postgresql_version }}"
+      - "postgresql-contrib-{{ postgresql_version }}"
+    state: present
+    update_cache: true
+
+- name: Ensure PostgreSQL service is enabled and started
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Set PostgreSQL to listen on all addresses
+  lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    regexp: "^#?listen_addresses ="
+    line: "listen_addresses = '{{ postgresql_listen_address }}'"
+  notify: Restart PostgreSQL
+
+- name: Allow access from any IP
+  lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    insertafter: "^# IPv4 local connections:"
+    line: "host    all             all             0.0.0.0/0               md5"
+  notify: Restart PostgreSQL
+
+- name: Create PostgreSQL database
+  community.postgresql.postgresql_db:
+    name: "{{ postgresql_db_name }}"
+    state: present
+  become_user: postgres
+
+- name: Create PostgreSQL user
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql_db_user }}"
+    password: "{{ postgresql_db_password }}"
+    db: "{{ postgresql_db_name }}"
+    priv: "ALL"
+    state: present
+  become_user: postgres

@@ -1,0 +1,5 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for nginx-role
+- name: Restart nginx
+  service: name="{{ svc }}" state=restarted
